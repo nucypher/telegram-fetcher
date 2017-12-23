@@ -1,0 +1,6 @@
+# Replace with your actual values and remove .example extension
+
+api_id = 123321
+api_hash = "f00ba3deadbeef"
+phone = "+1000"
+channel = 'nucypher'
