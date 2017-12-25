@@ -6,6 +6,16 @@ from telethon.tl.functions.channels import GetParticipantsRequest
 from telethon.tl.types import ChannelParticipantsSearch
 import json
 import config
+from datetime import date, datetime
+
+
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime, date)):
+        return obj.isoformat()
+    raise TypeError("Type %s not serializable" % type(obj))
+
 
 LIMIT = 100
 output_file = '%s.json' % config.channel
@@ -26,14 +36,9 @@ while True:
     if not participants.users:
         break
     for user in participants.users:
-        user_dict = user.to_dict()
-        if user_dict and 'status' in user_dict\
-           and user_dict['status'] and 'was_online' in user_dict['status']:
-            # Convert datetime objects
-            user_dict['status']['was_online'] = str(user_dict['status']['was_online'])
-        output.append(user_dict)
+        output.append(user.to_dict())
     offset += len(participants.users)
 
 print('Fetched %s users' % len(output))
 with open(output_file, 'w') as f:
-    json.dump(output, f)
+    json.dump(output, f, default=json_serial)
