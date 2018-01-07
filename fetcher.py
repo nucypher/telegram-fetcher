@@ -18,7 +18,6 @@ def json_serial(obj):
 
 
 LIMIT = 100
-output_file = '%s.json' % config.channel
 
 client = TelegramClient('fetcher-session', config.api_id, config.api_hash)
 client.connect()
@@ -40,5 +39,6 @@ while True:
     offset += len(participants.users)
 
 print('Fetched %s users' % len(output))
+output_file = '%s-%s.json' % (config.channel, len(output))
 with open(output_file, 'w') as f:
     json.dump(output, f, default=json_serial)
