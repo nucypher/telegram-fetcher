@@ -1,1 +1,4 @@
+__pycache__
 /config.py
+/*.json
+/*.session
