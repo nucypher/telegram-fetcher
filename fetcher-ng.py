@@ -21,6 +21,7 @@ def json_serial(obj):
 LIMIT = 500
 output_file = 'nucypher_telegram.json'
 users = []
+cursor = None
 
 while True:
     try:
@@ -35,7 +36,8 @@ while True:
 
         total, messages, senders = client.get_message_history(
                 channel, limit=1, offset_id=0)
-        cursor = messages[0].id + 1
+        if cursor is None:
+            cursor = messages[0].id + 1
 
         def check_participant(u):
             try:
@@ -69,10 +71,9 @@ while True:
             if cursor <= 1:
                 break
 
+        break
     except ConnectionAbortedError:
         print('Connection was aborted')
-
-    break
 
 # forward in time
 # + filter repetitions
