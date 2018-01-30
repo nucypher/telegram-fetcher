@@ -5,7 +5,7 @@ from telethon.tl.functions.contacts import ResolveUsernameRequest
 from telethon.tl.functions.channels import GetParticipantRequest
 from telethon.errors.rpc_error_list import UserNotParticipantError
 from telethon.tl import types
-# import json
+import json
 import config
 from datetime import date, datetime
 
@@ -31,9 +31,8 @@ channel = client(ResolveUsernameRequest(config.channel)).chats[0]
 
 total, messages, senders = client.get_message_history(
         channel, limit=1, offset_id=0)
-cursor = messages[0].id + 1
+cursor = 1000  # messages[0].id + 1  XXX
 users = []
-users_added = set()
 
 
 def check_participant(u):
@@ -55,7 +54,6 @@ while True:
             if isinstance(m.action, types.MessageActionChatJoinedByLink):
                 if check_participant(s):
                     users.append((m.date, s.to_dict()))
-                    users_added.add(s.id)
             elif isinstance(m.action, types.MessageActionChatAddUser):
                 for u_id in m.action.users:
                     if u_id == s.id:
@@ -64,12 +62,23 @@ while True:
                         user = client.get_entity(u_id)
                     if check_participant(s):
                         users.append((m.date, user.to_dict()))
-                        users_added.add(user.id)
 
     cursor = messages[-1].id
     print(cursor)
     if cursor <= 1:
         break
 
-import IPython
-IPython.embed()
+# forward in time
+# + filter repetitions
+users_added = set()
+in_users = users[::-1]
+users = []
+for d, u in in_users:
+    if u['id'] not in users_added:
+        users_added.add(u['id'])
+        users.append((d, u))
+
+print('Fetched %s users' % len(users_added))
+output_file = '%s-dated-%s.json' % (config.channel, len(users_added))
+with open(output_file, 'w') as f:
+    json.dump(users_added, f, default=json_serial)
