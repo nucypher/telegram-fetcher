@@ -31,7 +31,7 @@ channel = client(ResolveUsernameRequest(config.channel)).chats[0]
 
 total, messages, senders = client.get_message_history(
         channel, limit=1, offset_id=0)
-cursor = 1000  # messages[0].id + 1  XXX
+cursor = messages[0].id + 1
 users = []
 
 
@@ -81,4 +81,4 @@ for d, u in in_users:
 print('Fetched %s users' % len(users_added))
 output_file = '%s-dated-%s.json' % (config.channel, len(users_added))
 with open(output_file, 'w') as f:
-    json.dump(users_added, f, default=json_serial)
+    json.dump(users, f, default=json_serial, indent=4)
