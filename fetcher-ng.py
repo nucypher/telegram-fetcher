@@ -2,6 +2,8 @@
 
 from telethon import TelegramClient
 from telethon.tl.functions.contacts import ResolveUsernameRequest
+from telethon.tl.functions.channels import GetParticipantRequest
+from telethon.errors.rpc_error_list import UserNotParticipantError
 from telethon.tl import types
 # import json
 import config
@@ -33,6 +35,15 @@ cursor = messages[0].id + 1
 users = []
 users_added = set()
 
+
+def check_participant(u):
+    try:
+        client(GetParticipantRequest(channel, u))
+        return True
+    except UserNotParticipantError:
+        return False
+
+
 while True:
     total, messages, senders = client.get_message_history(
             channel, limit=LIMIT, offset_id=cursor)
@@ -42,22 +53,18 @@ while True:
     for m, s in zip(messages, senders):
         if isinstance(m, types.MessageService):
             if isinstance(m.action, types.MessageActionChatJoinedByLink):
-                if s.id not in users_added:
+                if check_participant(s):
                     users.append((m.date, s.to_dict()))
                     users_added.add(s.id)
-                else:
-                    print(s.id)
             elif isinstance(m.action, types.MessageActionChatAddUser):
                 for u_id in m.action.users:
                     if u_id == s.id:
                         user = s
                     else:
                         user = client.get_entity(u_id)
-                    if user.id not in users_added:
+                    if check_participant(s):
                         users.append((m.date, user.to_dict()))
                         users_added.add(user.id)
-                    else:
-                        print(user.id)
 
     cursor = messages[-1].id
     print(cursor)
