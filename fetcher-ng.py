@@ -5,6 +5,7 @@ from telethon.tl.functions.contacts import ResolveUsernameRequest
 from telethon.tl.functions.channels import GetParticipantRequest
 from telethon.errors.rpc_error_list import UserNotParticipantError
 from telethon.tl import types
+import socket
 import json
 import config
 from datetime import date, datetime
@@ -72,7 +73,7 @@ while True:
                 break
 
         break
-    except ConnectionAbortedError:
+    except (ConnectionAbortedError, socket.timeout):
         print('Connection was aborted')
 
 # forward in time
