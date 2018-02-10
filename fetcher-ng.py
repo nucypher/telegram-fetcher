@@ -73,7 +73,7 @@ while True:
                 break
 
         break
-    except (ConnectionAbortedError, socket.timeout):
+    except (ConnectionAbortedError, socket.timeout, ValueError):
         print('Connection was aborted')
 
 # forward in time
