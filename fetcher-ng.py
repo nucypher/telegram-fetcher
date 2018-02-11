@@ -102,14 +102,17 @@ while True:
 
 # forward in time
 # + filter repetitions
-users_added = set()
+users_dates = {}
+users_id = {}
 in_users = users[::-1]
 users = []
 for d, u in in_users:
-    if u['id'] not in users_added:
-        users_added.add(u['id'])
-        users.append((d, u))
+    users_id[u['id']] = u
+    users_dates[u['id']] = min(u.get(u['id'], d), d)
 
-print('Fetched %s users' % len(users_added))
+for uid, d in users_dates.items():
+    users.append((d, users_id[uid]))
+
+print('Fetched %s users' % len(users))
 with open(output_file, 'w') as f:
     json.dump(users, f, default=json_serial, indent=4)
