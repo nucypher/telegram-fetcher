@@ -8,6 +8,7 @@ from telethon.tl import types
 import socket
 import json
 import config
+import os
 from datetime import date, datetime
 
 
@@ -20,32 +21,55 @@ def json_serial(obj):
 
 
 LIMIT = 500
+early_file = 'nucypher_telegram_early.json'
 output_file = 'nucypher_telegram.json'
 users = []
 cursor = None
 
-while True:
+
+def check_participant(client, channel, u):
     try:
+        client(GetParticipantRequest(channel, u))
+        return True
+    except UserNotParticipantError:
+        return False
+
+
+def get_tg():
         client = TelegramClient('fetcher-session', config.api_id, config.api_hash)
         client.connect()
 
         if not client.is_user_authorized():
             client.sign_in(phone=config.phone)
-            me = client.sign_in(code=int(input('Enter code: ')))
+            client.sign_in(code=int(input('Enter code: ')))
 
         channel = client(ResolveUsernameRequest(config.channel)).chats[0]
+
+        return client, channel
+
+
+if os.path.exists(early_file):
+    print('Checking early users...')
+    early_date = datetime.fromtimestamp(os.path.getmtime(early_file))
+    client, channel = get_tg()
+    with open(early_file) as f:
+        ctr = 0
+        for user in json.load(f):
+            u_id = user['id']
+            user = client.get_entity(u_id)
+            if check_participant(client, channel, user):
+                users.append((early_date, user.to_dict()))
+                ctr += 1
+        print('Added {} early users'.format(ctr))
+
+while True:
+    try:
+        client, channel = get_tg()
 
         total, messages, senders = client.get_message_history(
                 channel, limit=1, offset_id=0)
         if cursor is None:
             cursor = messages[0].id + 1
-
-        def check_participant(u):
-            try:
-                client(GetParticipantRequest(channel, u))
-                return True
-            except UserNotParticipantError:
-                return False
 
         while True:
             total, messages, senders = client.get_message_history(
@@ -56,7 +80,7 @@ while True:
             for m, s in zip(messages, senders):
                 if isinstance(m, types.MessageService):
                     if isinstance(m.action, types.MessageActionChatJoinedByLink):
-                        if check_participant(s):
+                        if check_participant(client, channel, s):
                             users.append((m.date, s.to_dict()))
                     elif isinstance(m.action, types.MessageActionChatAddUser):
                         for u_id in m.action.users:
@@ -64,7 +88,7 @@ while True:
                                 user = s
                             else:
                                 user = client.get_entity(u_id)
-                            if check_participant(s):
+                            if check_participant(client, channel, user):
                                 users.append((m.date, user.to_dict()))
 
             cursor = messages[-1].id
