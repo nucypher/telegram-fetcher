@@ -30,7 +30,7 @@ cursor = None
 def check_participant(client, channel, u):
     try:
         participant = client(GetParticipantRequest(channel, u)).participant
-        return not isinstance(participant, (types.ChannelParticipantBanned))
+        return not isinstance(participant, types.ChannelParticipantBanned)
     except UserNotParticipantError:
         return False
 
