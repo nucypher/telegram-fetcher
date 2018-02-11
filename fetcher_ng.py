@@ -98,7 +98,7 @@ if __name__ == '__main__':
                     break
 
             break
-        except (ConnectionAbortedError, socket.timeout, ValueError):
+        except (ConnectionAbortedError, socket.timeout, ValueError, BufferError):
             print('Connection was aborted')
 
     # forward in time
