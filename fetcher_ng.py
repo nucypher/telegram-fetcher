@@ -23,6 +23,7 @@ def json_serial(obj):
 LIMIT = 500
 early_file = 'nucypher_telegram_early.json'
 output_file = 'nucypher_telegram.json'
+patch_files = ['users_admin_log.json']
 users = []
 cursor = None
 
@@ -62,6 +63,12 @@ if __name__ == '__main__':
                     users.append((early_date, user.to_dict()))
                     ctr += 1
             print('Added {} early users'.format(ctr))
+
+    for fname in patch_files:
+        with open(fname) as f:
+            users += json.read(f)
+    if patch_files:
+        print('Added more from patch')
 
     while True:
         try:
