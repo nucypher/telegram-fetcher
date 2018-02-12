@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
     for fname in patch_files:
         with open(fname) as f:
-            users += json.read(f)
+            users += json.load(f)
     if patch_files:
         print('Added more from patch')
 
