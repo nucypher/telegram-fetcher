@@ -58,10 +58,13 @@ if __name__ == '__main__':
             ctr = 0
             for user in json.load(f):
                 u_id = user['id']
-                user = client.get_entity(u_id)
-                if check_participant(client, channel, user):
-                    users.append((early_date, user.to_dict()))
-                    ctr += 1
+                try:
+                    user = client.get_entity(u_id)
+                    if check_participant(client, channel, user):
+                        users.append((early_date, user.to_dict()))
+                        ctr += 1
+                except ValueError:
+                    pass
             print('Added {} early users'.format(ctr))
 
     for fname in patch_files:
