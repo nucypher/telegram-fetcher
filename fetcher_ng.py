@@ -75,20 +75,18 @@ if __name__ == '__main__':
 
     while True:
         try:
-            client, channel = get_tg()
-
-            total, messages, senders = client.get_message_history(
-                    channel, limit=1, offset_id=0)
+            messages = client.get_messages(channel, limit=1, offset_id=0)
             if cursor is None:
                 cursor = messages[0].id + 1
 
             while True:
-                total, messages, senders = client.get_message_history(
+                messages = client.get_messages(
                         channel, limit=LIMIT, offset_id=cursor)
                 if not messages:
                     break
 
-                for m, s in zip(messages, senders):
+                for m in messages:
+                    s = m.sender
                     if isinstance(m, types.MessageService):
                         if isinstance(m.action, types.MessageActionChatJoinedByLink):
                             if check_participant(client, channel, s):
@@ -108,8 +106,9 @@ if __name__ == '__main__':
                     break
 
             break
-        except (ConnectionAbortedError, socket.timeout, ValueError, BufferError):
-            print('Connection was aborted')
+        except (ConnectionAbortedError, socket.timeout, ValueError, BufferError) as e:
+            print('Connection was aborted', e)
+            client, channel = get_tg()
 
     # forward in time
     # + filter repetitions
