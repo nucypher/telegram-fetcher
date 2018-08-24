@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
+import telethon.sync  # noqa
 from telethon import TelegramClient
 from telethon.tl.functions.contacts import ResolveUsernameRequest
 from telethon.tl.functions.channels import GetParticipantRequest
-from telethon.errors.rpc_error_list import UserNotParticipantError
+from telethon.errors import UserNotParticipantError
 from telethon.tl import types
 import socket
 import json
