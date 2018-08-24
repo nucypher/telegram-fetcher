@@ -51,10 +51,10 @@ def get_tg():
 
 
 if __name__ == '__main__':
+    client, channel = get_tg()
     if os.path.exists(early_file):
         print('Checking early users...')
         early_date = datetime.fromtimestamp(os.path.getmtime(early_file))
-        client, channel = get_tg()
         with open(early_file) as f:
             ctr = 0
             for user in json.load(f):
